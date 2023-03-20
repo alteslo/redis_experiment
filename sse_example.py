@@ -75,6 +75,7 @@ async def subscribe(channel: str, pub_sub: PubSub):
                     if message:
                         if message.get('data') == STOPWORD:
                             break
+                        print(message.get('data'))
                         yield {"event": "message", "data": message.get('data')}
                     await asyncio.sleep(0.01)
             except asyncio.TimeoutError:

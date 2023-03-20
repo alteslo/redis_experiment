@@ -1,31 +1,14 @@
+import asyncio
+
+import async_timeout
 from aioredis import Redis
 from aioredis.client import PubSub
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.params import Depends
 from fastapi_plugins import depends_redis, redis_plugin
 from sse_starlette.sse import EventSourceResponse
-from starlette.responses import HTMLResponse
-import async_timeout
-import asyncio
+# from starlette.responses import HTMLResponse
 
-
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>SSE</title>
-    </head>
-    <body>
-        <script>
-            const evtSource = new EventSource("http://127.0.0.1:8888/sse/stream");
-            evtSource.addEventListener("message", function(event) {
-                // Logic to handle status updates
-                console.log(event.data)
-            });
-        </script>
-    </body>
-</html>
-"""
 
 STOPWORD = "STOP"
 
@@ -33,7 +16,7 @@ app = FastAPI()
 
 
 @app.on_event("startup")
-async def on_startup() -> None:
+async def on_startup(redis: Redis = Depends(depends_redis)) -> None:
     await redis_plugin.init_app(app)
     await redis_plugin.init()
 
@@ -48,13 +31,14 @@ async def root_get(cache: Redis = Depends(depends_redis)) -> dict:
     return dict(ping=await cache.ping())
 
 
-@app.get("/sse/stream")
-async def stream(channel: str = "example:channel", redis: Redis = Depends(depends_redis)):
+@app.get("/listener")
+async def stream(background_tasks: BackgroundTasks, channel: str = "example:channel", redis: Redis = Depends(depends_redis)):
     pub_sub_reader = redis.pubsub()
-    return EventSourceResponse(subscribe(channel, pub_sub_reader))
+    # background_tasks.add_task(listener(channel, pub_sub_reader))
+    return EventSourceResponse(listener(channel, pub_sub_reader))
 
 
-async def subscribe(channel: str, pub_sub: PubSub):
+async def listener(channel: str, pub_sub: PubSub):
     async with pub_sub as p:
         await p.subscribe(channel)
         while True:

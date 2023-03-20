@@ -1,33 +1,8 @@
 from aioredis import Redis
-from aioredis.client import PubSub
 from fastapi import FastAPI
 from fastapi.params import Depends
 from fastapi_plugins import depends_redis, redis_plugin
-from sse_starlette.sse import EventSourceResponse
-from starlette.responses import HTMLResponse
-import async_timeout
-import asyncio
 
-
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>SSE</title>
-    </head>
-    <body>
-        <script>
-            const evtSource = new EventSource("http://127.0.0.1:8888/sse/stream");
-            evtSource.addEventListener("message", function(event) {
-                // Logic to handle status updates
-                console.log(event.data)
-            });
-        </script>
-    </body>
-</html>
-"""
-
-STOPWORD = "STOP"
 
 app = FastAPI()
 
