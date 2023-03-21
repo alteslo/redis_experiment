@@ -2,6 +2,7 @@ from aioredis import Redis
 from fastapi import FastAPI
 from fastapi.params import Depends
 from fastapi_plugins import depends_redis, redis_plugin
+import json
 
 
 app = FastAPI()
@@ -23,7 +24,8 @@ async def root_get(cache: Redis = Depends(depends_redis)) -> dict:
     return dict(ping=await cache.ping())
 
 
-@app.get("/publish")
-async def get_publish(channel: str = "first_app:channel", message: str = "Hello world!", redis: Redis = Depends(depends_redis)):
+@app.post("/publish")
+async def get_publish(message: dict[str, str], channel: str = "first_app:channel", redis: Redis = Depends(depends_redis)):
+    message = json.dumps(message)
     await redis.publish(channel=channel, message=message)
     return ""
