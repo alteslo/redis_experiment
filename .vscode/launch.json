@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "sse_example:app",
+                "forth_app:app",
                 "--reload",
                 "--port=8888"
             ],

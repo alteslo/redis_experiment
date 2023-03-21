@@ -14,8 +14,7 @@ client = redis.from_url('redis: // localhost')
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    subscriber = client.pubsub()
-    asyncio.create_task(consumer("first_app:channel", subscriber))
+    asyncio.create_task(consumer("first_app:channel"))
 
 
 @app.on_event("shutdown")
@@ -28,8 +27,14 @@ async def root_get() -> dict:
     return dict(ping=await client.ping())
 
 
-async def consumer(channel: str, pub_sub: PubSub):
-    await pub_sub.psubscribe(channel)
+async def get_pubsub(channel: str):
+    subscriber = client.pubsub()
+    await subscriber.psubscribe(channel)
+    return subscriber
+
+
+async def consumer(channel: str):
+    pub_sub: PubSub = await get_pubsub(channel)
     while True:
         try:
             async with async_timeout.timeout(1):
