@@ -12,7 +12,7 @@
             "args": [
                 "forth_app:app",
                 "--reload",
-                "--port=8888"
+                "--port=7777"
             ],
             "jinja": true,
             "justMyCode": true
