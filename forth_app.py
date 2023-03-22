@@ -6,10 +6,10 @@ import async_timeout
 import redis.asyncio as redis
 from redis.client import PubSub
 
-SUBSCRIBE_CHANNELS = ('first_app:channel', 'test_app:channel')
+SUBSCRIBE_CHANNELS = ('first_app:channel', 'service:file')
 
 app = FastAPI()
-client = redis.from_url('redis: // localhost')
+client = redis.from_url('redis://localhost')
 
 
 @app.on_event('startup')
@@ -43,6 +43,9 @@ async def message_manager(message: dict | None):
                 print({'channel': 'first_app:channel', 'data': message})
             case 'test_app:channel':
                 print({'channel': 'Тестовый канал', 'data': message})
+            case 'service:file':
+                print({'channel': channel, 'data': message})
+        
 
 
 async def listen(*channels):
